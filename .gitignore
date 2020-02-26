@@ -1,5 +1,4 @@
 .DS_Store
-./code/__pycache__
-./code/*.log
-./code/*.gz
+./code/p3-example/__pycache__
 ./docs/*.docx
+
