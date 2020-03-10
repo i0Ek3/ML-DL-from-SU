@@ -8,19 +8,16 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 dataset_path = keras.utils.get_file("auto-mpg.data", "http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data")
-dataset_path
+#dataset_path
 
-column_names = ['MPG','Cylinders','Displacement','Horsepower','Weight',
-                'Acceleration', 'Model Year', 'Origin']
-raw_dataset = pd.read_csv(dataset_path, names=column_names,
-                      na_values = "?", comment='\t',
-                      sep=" ", skipinitialspace=True)
+column_names = ['MPG','Cylinders','Displacement','Horsepower','Weight', 'Acceleration', 'Model Year', 'Origin']
+raw_dataset = pd.read_csv(dataset_path, names=column_names, na_values = "?", comment='\t', sep=" ", skipinitialspace=True)
 
 dataset = raw_dataset.copy()
 dataset.tail()
 
 # clean data
-dataset.isna().sum() # is N/A?
+dataset.isna().sum()
 dataset = dataset.dropna()
 origin = dataset.pop('Origin')
 dataset['USA'] = (origin == 1)*1.0
@@ -47,88 +44,80 @@ test_labels = test_dataset.pop('MPG')
 
 # data normalization
 def norm(x):
-  return (x - train_stats['mean']) / train_stats['std']
+    return (x - train_stats['mean']) / train_stats['std']
 normed_train_data = norm(train_dataset)
 normed_test_data = norm(test_dataset)
 
 def build_model():
-  model = keras.Sequential([
-    layers.Dense(64, activation='relu', input_shape=[len(train_dataset.keys())]),
-    layers.Dense(64, activation='relu'),
-    layers.Dense(1)
-  ])
+    model = keras.Sequential([
+        layers.Dense(64, activation='relu', input_shape=[len(train_dataset.keys())]),
+        layers.Dense(64, activation='relu'),
+        layers.Dense(1)
+    ])
 
-  optimizer = tf.keras.optimizers.RMSprop(0.001)
+    optimizer = tf.keras.optimizers.RMSprop(0.001)
 
-  model.compile(loss='mse',
+    model.compile(loss='mse',
                 optimizer=optimizer,
                 metrics=['mae', 'mse'])
-  return model
+    return model
 model = build_model()
 model.summary()
 
-example_batch = normed_train_data[:10]
-example_result = model.predict(example_batch)
-example_result
+# test
+#example_batch = normed_train_data[:10]
+#example_result = model.predict(example_batch)
+#example_result
 
-# 通过为每个完成的时期打印一个点来显示训练进度
 class PrintDot(keras.callbacks.Callback):
-  def on_epoch_end(self, epoch, logs):
-    if epoch % 100 == 0: print('')
-    print('.', end='')
+    def on_epoch_end(self, epoch, logs):
+        if epoch % 100 == 0: print('')
+        print('.', end='')
 
 EPOCHS = 1000
 
 history = model.fit(
-  normed_train_data, train_labels,
-  epochs=EPOCHS, validation_split = 0.2, verbose=0,
-  callbacks=[PrintDot()])
+    normed_train_data, train_labels,
+    epochs=EPOCHS, validation_split = 0.2, verbose=1,
+    callbacks=[PrintDot()])
 
 hist = pd.DataFrame(history.history)
 hist['epoch'] = history.epoch
 hist.tail()
 
 def plot_history(history):
-  hist = pd.DataFrame(history.history)
-  hist['epoch'] = history.epoch
+    hist = pd.DataFrame(history.history)
+    hist['epoch'] = history.epoch
 
-  plt.figure()
-  plt.xlabel('Epoch')
-  plt.ylabel('Mean Abs Error [MPG]')
-  plt.plot(hist['epoch'], hist['mae'],
-           label='Train Error')
-  plt.plot(hist['epoch'], hist['val_mae'],
-           label = 'Val Error')
-  plt.ylim([0,5])
-  plt.legend()
+    plt.figure()
+    plt.xlabel('Epoch')
+    plt.ylabel('Mean Abs Error [MPG]')
+    plt.plot(hist['epoch'], hist['mae'], label='Train Error')
+    plt.plot(hist['epoch'], hist['val_mae'], label = 'Val Error')
+    plt.ylim([0,5])
+    plt.legend()
 
-  plt.figure()
-  plt.xlabel('Epoch')
-  plt.ylabel('Mean Square Error [$MPG^2$]')
-  plt.plot(hist['epoch'], hist['mse'],
-           label='Train Error')
-  plt.plot(hist['epoch'], hist['val_mse'],
-           label = 'Val Error')
-  plt.ylim([0,20])
-  plt.legend()
-  plt.show()
+    plt.figure()
+    plt.xlabel('Epoch')
+    plt.ylabel('Mean Square Error [$MPG^2$]')
+    plt.plot(hist['epoch'], hist['mse'], label='Train Error')
+    plt.plot(hist['epoch'], hist['val_mse'], label = 'Val Error')
+    plt.ylim([0,20])
+    plt.legend()
+    plt.show()
 
 plot_history(history)
 
 model = build_model()
-
-# patience 值用来检查改进 epochs 的数量
 early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
-
-history = model.fit(normed_train_data, train_labels, epochs=EPOCHS,
-                    validation_split = 0.2, verbose=0, callbacks=[early_stop, PrintDot()])
+history = model.fit(normed_train_data, train_labels, epochs=EPOCHS, validation_split = 0.2, verbose=1, callbacks=[early_stop, PrintDot()])
 
 plot_history(history)
 
-loss, mae, mse = model.evaluate(normed_test_data, test_labels, verbose=2)
+loss, mae, mse = model.evaluate(normed_test_data, test_labels, verbose=1)
 print("Testing set Mean Abs Error: {:5.2f} MPG".format(mae))
 
-# make predictions
+# predictions
 test_predictions = model.predict(normed_test_data).flatten()
 plt.scatter(test_labels, test_predictions)
 plt.xlabel('True Values [MPG]')
@@ -139,12 +128,8 @@ plt.xlim([0,plt.xlim()[1]])
 plt.ylim([0,plt.ylim()[1]])
 _ = plt.plot([-100, 100], [-100, 100])
 
+# error distribution
 error = test_predictions - test_labels
 plt.hist(error, bins = 25)
 plt.xlabel("Prediction Error [MPG]")
 _ = plt.ylabel("Count")
-
-
-
-
-

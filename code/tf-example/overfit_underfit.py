@@ -32,14 +32,14 @@ ds = tf.data.experimental.CsvDataset(gz,[float(),]*(FEATURES+1), compression_typ
 
 # pack list into pair
 def pack_row(*row):
-  label = row[0]
-  features = tf.stack(row[1:],1)
-  return features, label
+    label = row[0]
+    features = tf.stack(row[1:],1)
+    return features, label
 
 packed_ds = ds.batch(10000).map(pack_row).unbatch()
 for features,label in packed_ds.batch(1000).take(1):
-  print(features[0])
-  plt.hist(features.numpy().flatten(), bins = 101)
+    print(features[0])
+    plt.hist(features.numpy().flatten(), bins = 101)
 
 # first 1000 samples for validation, and the next 10 000 for training
 N_VALIDATION = int(1e3)
@@ -59,13 +59,13 @@ train_ds = train_ds.shuffle(BUFFER_SIZE).repeat().batch(BATCH_SIZE)
 # Overfitting
 # training procedure
 lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
-  0.001,
-  decay_steps=STEPS_PER_EPOCH*1000,
-  decay_rate=1,
-  staircase=False)
+    0.001,
+    decay_steps=STEPS_PER_EPOCH*1000,
+    decay_rate=1,
+    staircase=False)
 
 def get_optimizer():
-  return tf.keras.optimizers.Adam(lr_schedule)
+    return tf.keras.optimizers.Adam(lr_schedule)
 
 step = np.linspace(0,100000)
 lr = lr_schedule(step)
@@ -76,32 +76,25 @@ plt.xlabel('Epoch')
 _ = plt.ylabel('Learning Rate')
 
 def get_callbacks(name):
-  return [
-    tfdocs.modeling.EpochDots(),
-    tf.keras.callbacks.EarlyStopping(monitor='val_binary_crossentropy', patience=200),
-    tf.keras.callbacks.TensorBoard(logdir/name),
-  ]
+    return [
+        tfdocs.modeling.EpochDots(),
+        tf.keras.callbacks.EarlyStopping(monitor='val_binary_crossentropy', patience=200),
+        tf.keras.callbacks.TensorBoard(logdir/name),
+    ]
 
 def compile_and_fit(model, name, optimizer=None, max_epochs=10000):
-  if optimizer is None:
-    optimizer = get_optimizer()
-  model.compile(optimizer=optimizer,
-                loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-                metrics=[
-                  tf.keras.losses.BinaryCrossentropy(
-                      from_logits=True, name='binary_crossentropy'),
-                  'accuracy'])
-
-  model.summary()
-
-  history = model.fit(
-    train_ds,
-    steps_per_epoch = STEPS_PER_EPOCH,
-    epochs=max_epochs,
-    validation_data=validate_ds,
-    callbacks=get_callbacks(name),
-    verbose=0)
-  return history
+    if optimizer is None:
+        optimizer = get_optimizer()
+    model.compile(optimizer=optimizer, loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), metrics=[tf.keras.losses.BinaryCrossentropy(from_logits=True, name='binary_crossentropy'),'accuracy'])
+    model.summary()
+    history = model.fit(
+        train_ds,
+        steps_per_epoch = STEPS_PER_EPOCH,
+        epochs=max_epochs,
+        validation_data=validate_ds,
+        callbacks=get_callbacks(name),
+        verbose=0)
+    return history
 
 # tiny model
 # training a linear model
