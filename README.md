@@ -1,16 +1,20 @@
 # ML-DL-from-SU
 
-> Stanford University Machine Learning and Deep Learning Course by Andrew Ng.
+> Stanford University Machine Learning(CS229) and Deep Learning(CS230) Course by Andrew Ng.
 
 :tada: :tada: :tada: Bravo, notes modified finished and pdf files save to the docs/, welcome to read. Thanks for PhD huang with his amazing work.
 
-Something I learned from Andrew Ng, that's really amazing. And the notes just modified from PhD Huang and I fixed some typos and make some changes. 
+Here are something I learned from Andrew Ng, that's really amazing. And the notes just modified from PhD Huang and I fixed some typos and make some changes. 
 
 The files under the code/tf-example/ just from TensorFlow docs, I make some changes and they all worked well, I just checked it.
 
-Of course, before you execute these files please be sure you have required dependices. 
+Of course, before you execute these files please be sure you have required dependences. 
 
 Have fun, always updating!
+
+## Noted
+
+The ML(CS229)/DL(CS230) vedio courses noticed in this repo producted in 2014, so you should know some libraries have changed in TensorFlow and Keras, please ensure what exactly you do before you run it! 
 
 ## Issues
 
